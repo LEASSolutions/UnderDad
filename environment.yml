@@ -1,0 +1,9 @@
+name: underdad
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - python >=3.10,<4.0.0
+  - nodejs >=20,<21
+  - poetry
