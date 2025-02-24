@@ -1,0 +1,34 @@
+---
+networks:
+  net:
+    driver: bridge
+    name: "${NETWORK}"
+    external: true
+
+services:
+  underdad:
+    container_name: underdad4${DOMAIN_NAME}
+    # the application's underdad service (container) will use an image based on our Dockerfile
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    expose:
+      - 80
+    # the default command to run whenever the container is launched
+    command: python manage.py runserver 0.0.0.0:80
+    networks:
+      - net
+    labels:
+      # Explicitly tell Traefik to expose this container
+      - 'traefik.enable=true'
+      # The domain the service will respond to
+      - 'traefik.http.routers.underdad4${DOMAIN_NAME}.rule=Host(`underdad.${DOMAIN_NAME}.${DOMAIN_TLD}`)'
+      # Allow request only from the predefined entry point named "https"
+      - 'traefik.http.routers.underdad4${DOMAIN_NAME}.entrypoints=https'
+      - 'traefik.http.routers.underdad4${DOMAIN_NAME}.tls=true'
+      # Uses the Host rule to define which certificate to issue
+      - 'traefik.http.routers.underdad4${DOMAIN_NAME}.tls.certresolver=${TRAEFIK_SERVICES_CERTRESOLVER}'
+      # - 'traefik.http.routers.underdad4${DOMAIN_NAME}.middlewares=authelia4${DOMAIN_NAME}@docker'
+    env_file: .env-dev
+    restart: unless-stopped
+...
